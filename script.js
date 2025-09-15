@@ -58,7 +58,7 @@ let throws = 0;
 const maxThrows = 30;
 
 // 조건 설정
-let condition = "inclusion"; // "exclusion" 가능
+let condition = "exclusion"
 
 // 참여자가 던질 대상 선택
 let userSelected = false;

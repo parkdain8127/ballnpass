@@ -128,10 +128,18 @@ function throwBall() {
     targetPlayer = null;
   } else { // NPC 자동 던지기
     if (condition === "inclusion") {
+      // 기존 inclusion 로직
       target = Math.random() < 0.4 ? 0 : (Math.random() < 0.5 ? 1 : 2);
-    } else {
-      if (throws < 6) target = Math.random() < 0.2 ? 0 : (Math.random() < 0.5 ? 1 : 2);
-      else target = Math.random() < 0.05 ? 0 : (Math.random() < 0.5 ? 1 : 2);
+    } else { // exclusion: 사회적 배척 시나리오
+      if (throws < 6) {
+        // 첫 6번은 참여자가 받을 확률 조금 있게
+        target = Math.random() < 0.5 ? 0 : (Math.random() < 0.5 ? 1 : 2);
+      } else {
+        // 나머지 24번은 참여자(0)에게 거의 안 던지도록
+        const rand = Math.random();
+        if (rand < 0.05) target = 0; // 5% 확률만 참여자
+        else target = Math.random() < 0.5 ? 1 : 2; // 나머지는 P2 또는 P3
+      }
     }
   }
 
@@ -139,6 +147,7 @@ function throwBall() {
   ball.heldBy = target;
   throws++;
 }
+
 
 // 공 애니메이션 (throw 상태 이미지 순차 표시, 각 200ms)
 function animateThrow(from, to) {

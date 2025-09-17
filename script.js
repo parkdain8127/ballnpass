@@ -127,6 +127,11 @@ function throwBall() {
     target = targetPlayer;
     userSelected = false;
     targetPlayer = null;
+
+    animateThrow(current, target);
+    ball.heldBy = target;
+    throws++;
+
   } else {
     // NPC 자동 던지기
     if (inclusionThrows.includes(throws + 1)) {
@@ -135,11 +140,16 @@ function throwBall() {
       // exclusion 구간: 절대 참가자에게 안 감
       target = current === 1 ? 2 : 1;
     }
-  }
 
-  animateThrow(current, target);
-  ball.heldBy = target;
-  throws++;
+    // NPC가 고민하는 랜덤 시간 (0.5초~2초)
+    const thinkTime = 500 + Math.random() * 1500;
+
+    setTimeout(() => {
+      animateThrow(current, target);
+      ball.heldBy = target;
+      throws++;
+    }, thinkTime);
+  }
 }
 
 // 공 애니메이션 (throw 상태 이미지 순차 표시, 각 200ms)

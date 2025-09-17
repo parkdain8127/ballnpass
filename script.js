@@ -151,4 +151,25 @@ window.onload = function () {
     function gameLoop() {
         if (gameOver) return;
 
-        ctx.clearRec
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        players.forEach(player => player.draw());
+        ball.update();
+        ball.draw();
+
+        requestAnimationFrame(gameLoop);
+    }
+
+    function endGame() {
+        gameOver = true;
+        canvas.style.display = "none";
+        gameOverScreen.style.display = "flex";
+    }
+
+    // 로딩 → 게임 시작 (6초 후)
+    setTimeout(() => {
+        loadingScreen.style.display = "none";
+        canvas.style.display = "block";
+        initGame();
+    }, 6000);
+};

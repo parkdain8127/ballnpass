@@ -57,8 +57,8 @@ let ball = {x: 300, y: 350, radius: 10, heldBy: 0};
 let throws = 0;
 const maxThrows = 30;
 
-// 조건 설정
-let condition = "exclusion"
+// Exclusion 조건: 참가자가 받는 횟수 고정
+const inclusionThrows = [1, 3, 5, 8, 11, 14];
 
 // 참여자가 던질 대상 선택
 let userSelected = false;
@@ -118,7 +118,8 @@ function throwBall() {
   let current = ball.heldBy;
   let target;
 
-  if (current === 0) { // 참여자가 공을 가지고 있으면 선택 대기
+  if (current === 0) { 
+    // 참가자가 공을 가지고 있으면 → 선택 대기
     if (!userSelected) {
       requestAnimationFrame(throwBall);
       return;
@@ -126,16 +127,13 @@ function throwBall() {
     target = targetPlayer;
     userSelected = false;
     targetPlayer = null;
-  } else { // NPC 자동 던지기
-    if (condition === "exclusion") {
-      // 반드시 참가자가 받는 throw 번호 지정
-      const mustGoToUser = [1, 3, 5, 8, 11, 14];
-      if (mustGoToUser.includes(throws + 1)) {
-        target = 0; // 참가자에게
-      } else {
-        // 나머지는 참가자 제외 → P2 ↔ P3만
-        target = current === 1 ? 2 : 1;
-      }
+  } else {
+    // NPC 자동 던지기
+    if (inclusionThrows.includes(throws + 1)) {
+      target = 0; // 참가자에게 강제 패스
+    } else {
+      // exclusion 구간: 절대 참가자에게 안 감
+      target = current === 1 ? 2 : 1;
     }
   }
 
@@ -146,10 +144,10 @@ function throwBall() {
 
 // 공 애니메이션 (throw 상태 이미지 순차 표시, 각 200ms)
 function animateThrow(from, to) {
-  const throwImgs = avatars[from]["throw"]; // 3개 이미지
+  const throwImgs = avatars[from]["throw"];
   let step = 0;
   const steps = throwImgs.length;
-  const intervalTime = 200; // 각 이미지 표시 시간(ms)
+  const intervalTime = 200;
 
   const startX = players[from].x;
   const startY = players[from].y;
@@ -159,12 +157,10 @@ function animateThrow(from, to) {
   players[from].state = "throw";
 
   const interval = setInterval(() => {
-    // 공 위치 진행
-    const progress = (step + 1)/steps;
+    const progress = (step + 1) / steps;
     ball.x = startX + (endX - startX) * progress;
     ball.y = startY + (endY - startY) * progress;
 
-    // 현재 throw 이미지
     players[from].currentThrowImg = throwImgs[step];
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);

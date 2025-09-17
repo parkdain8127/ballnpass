@@ -58,7 +58,7 @@ let throws = 0;
 const maxThrows = 30;
 
 // Exclusion 조건: 참가자가 받는 횟수 고정
-const inclusionThrows = [1, 3, 5, 8, 11, 14];
+const inclusionThrows = [1, 2, 3, 4, 5, 6];
 
 // 참여자가 던질 대상 선택
 let userSelected = false;

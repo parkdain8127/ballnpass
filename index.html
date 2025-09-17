@@ -33,14 +33,18 @@
 </head>
 <body>
   <!-- 로딩 화면 -->
-  <div id="loadingScreen">Loading...</div>
+  <div id="loading">
+    <h1>Loading...</h1>
+  </div>
 
-  <!-- 게임 화면 -->
+  <!-- 게임 영역 -->
   <canvas id="gameCanvas" width="800" height="600"></canvas>
 
   <!-- 게임 오버 화면 -->
-  <div id="gameOverScreen">Game Over</div>
+  <div id="gameOverScreen" style="display:none;">
+    <h1>Game Over</h1>
+  </div>
 
-  <script src="script.js" defer></script>
+  <script src="script.js"></script>
 </body>
 </html>

@@ -5,6 +5,11 @@ window.onload = function () {
     const loadingScreen = document.getElementById("loadingScreen");
     const gameOverScreen = document.getElementById("gameOverScreen");
 
+    // 초기 상태 확실히 설정
+    canvas.style.display = "none";
+    gameOverScreen.style.display = "none";
+    loadingScreen.style.display = "flex";
+
     canvas.width = 800;
     canvas.height = 600;
 
@@ -146,25 +151,4 @@ window.onload = function () {
     function gameLoop() {
         if (gameOver) return;
 
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-        players.forEach(player => player.draw());
-        ball.update();
-        ball.draw();
-
-        requestAnimationFrame(gameLoop);
-    }
-
-    function endGame() {
-        gameOver = true;
-        canvas.style.display = "none";
-        gameOverScreen.style.display = "flex";
-    }
-
-    // 로딩 → 게임 시작 (6.5초)
-    setTimeout(() => {
-        loadingScreen.style.display = "none";
-        canvas.style.display = "block";
-        initGame();
-    }, 6500);
-};
+        ctx.clearRec

@@ -1,58 +1,21 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Ball Passing Game</title>
-  <style>
-    body {
-      margin: 0;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      background-color: #f0f0f0;
-    }
-    #loading {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      text-align: center;
-      font-size: 24px;
-    }
-    #gameCanvas {
-      display: none;
-      background-color: #fff;
-      border: 2px solid #000;
-    }
-    #gameOverScreen {
-      display: none;
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      font-size: 48px;
-      font-weight: bold;
-      color: red;
-    }
-  </style>
+  <title>Cyberball Task</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <!-- 로딩 화면 -->
-  <div id="loading">
-    <h1>Loading...</h1>
+  <div id="loading-screen">
+    <h2>Loading...</h2>
     <p>Other players are joining...</p>
   </div>
 
-  <!-- 게임 영역 -->
-  <canvas id="gameCanvas" width="800" height="600"></canvas>
-
-  <!-- 게임 오버 화면 -->
-  <div id="gameOverScreen">
-    Game Over
+  <div id="game-screen" class="hidden">
+    <canvas id="gameCanvas"></canvas>
+    <div id="info"></div>
   </div>
 
-  <!-- 스크립트 -->
   <script src="script.js"></script>
 </body>
 </html>

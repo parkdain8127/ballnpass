@@ -2,20 +2,45 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Cyberball Task</title>
-  <link rel="stylesheet" href="style.css">
+  <title>Cyberball Game</title>
+  <style>
+    body, html {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: #f0f0f0;
+    }
+
+    #loadingScreen, #gameOverScreen {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 48px;
+      font-weight: bold;
+      background: white;
+      z-index: 10;
+    }
+
+    #gameOverScreen { display: none; }
+    #gameCanvas { display: none; background: #cceeff; }
+  </style>
 </head>
 <body>
-  <div id="loading-screen">
-    <h2>Loading...</h2>
-    <p>Other players are joining...</p>
-  </div>
+  <!-- 로딩 화면 -->
+  <div id="loadingScreen">Loading...</div>
 
-  <div id="game-screen" class="hidden">
-    <canvas id="gameCanvas"></canvas>
-    <div id="info"></div>
-  </div>
+  <!-- 게임 화면 -->
+  <canvas id="gameCanvas" width="800" height="600"></canvas>
 
-  <script src="script.js"></script>
+  <!-- 게임 오버 화면 -->
+  <div id="gameOverScreen">Game Over</div>
+
+  <script src="script.js" defer></script>
 </body>
 </html>

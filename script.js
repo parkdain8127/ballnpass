@@ -168,8 +168,8 @@ window.onload = function () {
 
     // 로딩 → 게임 시작 (6초 후)
     setTimeout(() => {
-        loadingScreen.style.display = "none";
-        canvas.style.display = "block";
-        initGame();
-    }, 6000);
+  document.getElementById("loading").style.display = "none";
+  canvas.style.display = "block";
+  gameLoop();
+}, 6500);
 };

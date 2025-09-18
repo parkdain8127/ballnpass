@@ -5,9 +5,9 @@ canvas.height = 400;
 
 // 플레이어 설정
 let players = [
-  {name: "You", x: 300, y: 350, state: "idle", currentThrowImg: null, throwAnim: null},
-  {name: "P2", x: 150, y: 150, state: "idle", currentThrowImg: null, throwAnim: null},
-  {name: "P3", x: 450, y: 150, state: "idle", currentThrowImg: null, throwAnim: null}
+  {name: "You", x: 300, y: 350, state: "idle", currentThrowImg: null},
+  {name: "P2", x: 150, y: 150, state: "idle", currentThrowImg: null},
+  {name: "P3", x: 450, y: 150, state: "idle", currentThrowImg: null}
 ];
 
 const playerStates = ['idle', 'active', 'throw', 'catch'];
@@ -58,11 +58,7 @@ let throws = 0;
 const maxThrows = 30;
 
 // 조건 설정
-let condition = "inclusion"; // "exclusion" 가능
-
-// NPC 제약 관리 변수
-let npcChainCount = 0;
-let lastNpcPair = null;
+let condition = "exclusion"
 
 // 참여자가 던질 대상 선택
 let userSelected = false;
@@ -122,8 +118,7 @@ function throwBall() {
   let current = ball.heldBy;
   let target;
 
-  if (current === 0) { 
-    // 참가자가 공을 가지고 있으면 선택 대기
+  if (current === 0) { // 참여자가 공을 가지고 있으면 선택 대기
     if (!userSelected) {
       requestAnimationFrame(throwBall);
       return;
@@ -131,35 +126,16 @@ function throwBall() {
     target = targetPlayer;
     userSelected = false;
     targetPlayer = null;
-    npcChainCount = 0; // NPC 체인 초기화
-    lastNpcPair = null;
-  } else { 
-    // NPC 자동 던지기
-    if (condition === "inclusion") {
-      if (throws === maxThrows - 1) {
-        target = 0; // 마지막은 참가자
+  } else { // NPC 자동 던지기
+    if (condition === "exclusion") {
+      // 반드시 참가자가 받는 throw 번호 지정
+      const mustGoToUser = [1, 3, 5, 8, 11, 14];
+      if (mustGoToUser.includes(throws + 1)) {
+        target = 0; // 참가자에게
       } else {
-        do {
-          target = Math.random() < 0.4 ? 0 : (Math.random() < 0.5 ? 1 : 2);
-
-          if (target === 0) {
-            npcChainCount = 0;
-            lastNpcPair = null;
-            break;
-          } else {
-            const newPair = [current, target].sort().join("-");
-            if (newPair === lastNpcPair) {
-              npcChainCount++;
-            } else {
-              npcChainCount = 1;
-              lastNpcPair = newPair;
-            }
-          }
-        } while (npcChainCount > 3);
+        // 나머지는 참가자 제외 → P2 ↔ P3만
+        target = current === 1 ? 2 : 1;
       }
-    } else {
-      if (throws < 6) target = Math.random() < 0.2 ? 0 : (Math.random() < 0.5 ? 1 : 2);
-      else target = Math.random() < 0.05 ? 0 : (Math.random() < 0.5 ? 1 : 2);
     }
   }
 
@@ -168,12 +144,12 @@ function throwBall() {
   throws++;
 }
 
-// 공 애니메이션
+// 공 애니메이션 (throw 상태 이미지 순차 표시, 각 200ms)
 function animateThrow(from, to) {
-  const throwImgs = avatars[from]["throw"];
+  const throwImgs = avatars[from]["throw"]; // 3개 이미지
   let step = 0;
   const steps = throwImgs.length;
-  const intervalTime = 200;
+  const intervalTime = 200; // 각 이미지 표시 시간(ms)
 
   const startX = players[from].x;
   const startY = players[from].y;
@@ -182,46 +158,13 @@ function animateThrow(from, to) {
 
   players[from].state = "throw";
 
-  // NPC라면 던지기 전 throw 애니메이션 반복
-  if (from !== 0) {
-    if (players[from].throwAnim) clearInterval(players[from].throwAnim);
-    players[from].throwAnim = setInterval(() => {
-      players[from].currentThrowImg = throwImgs[step];
-      step = (step + 1) % steps;
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      drawPlayers();
-      drawBall();
-    }, intervalTime);
-
-    const randomDelay = Math.random() * 1200 + 800; // 800~2000ms
-    setTimeout(() => {
-      clearInterval(players[from].throwAnim);
-      players[from].throwAnim = null;
-      runThrowAnimation(from, to, throwImgs);
-    }, randomDelay);
-
-  } else {
-    // 참가자는 즉시 한 번만 던짐
-    runThrowAnimation(from, to, throwImgs);
-  }
-}
-
-// 실제 던지는 동작
-function runThrowAnimation(from, to, throwImgs) {
-  let step = 0;
-  const steps = throwImgs.length;
-  const intervalTime = 200;
-
-  const startX = players[from].x;
-  const startY = players[from].y;
-  const endX = players[to].x;
-  const endY = players[to].y;
-
   const interval = setInterval(() => {
+    // 공 위치 진행
     const progress = (step + 1)/steps;
     ball.x = startX + (endX - startX) * progress;
     ball.y = startY + (endY - startY) * progress;
 
+    // 현재 throw 이미지
     players[from].currentThrowImg = throwImgs[step];
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -232,17 +175,10 @@ function runThrowAnimation(from, to, throwImgs) {
     if (step >= steps) {
       clearInterval(interval);
       players[to].state = "catch";
-      setTimeout(() => { players[to].state = "idle"; }, 500);
+      setTimeout(() => { players[to].state = "idle"; }, 1000);
       players[from].state = "idle";
       players[from].currentThrowImg = null;
-
-      if (to !== 0) {
-        // NPC는 랜덤 딜레이 후 던짐
-        const randomDelay = Math.random() * 1200 + 800;
-        setTimeout(throwBall, randomDelay);
-      } else {
-        setTimeout(throwBall, 500);
-      }
+      setTimeout(throwBall, 500);
     }
   }, intervalTime);
 }

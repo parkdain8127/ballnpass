@@ -108,31 +108,6 @@ function endGame() {
   document.body.appendChild(gameOverDiv);
 }
 
-// NPC 가짜 던지기 시늉
-function fakeThrowAnimation(npcIndex, callback) {
-  const throwImgs = avatars[npcIndex]["throw"];
-  let step = 0;
-  const steps = throwImgs.length;
-  const intervalTime = 150;
-
-  players[npcIndex].state = "throw";
-
-  const interval = setInterval(() => {
-    players[npcIndex].currentThrowImg = throwImgs[step];
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    drawPlayers();
-    drawBall();
-
-    step++;
-    if (step >= steps) {
-      clearInterval(interval);
-      players[npcIndex].state = "idle";
-      players[npcIndex].currentThrowImg = null;
-      if (callback) callback();
-    }
-  }, intervalTime);
-}
-
 // 공 던지기
 function throwBall() {
   if (throws >= maxThrows) {
@@ -162,20 +137,17 @@ function throwBall() {
     if (inclusionThrows.includes(throws + 1)) {
       target = 0; // 참가자에게 강제 패스
     } else {
+      // exclusion 구간: 절대 참가자에게 안 감
       target = current === 1 ? 2 : 1;
     }
 
-    // NPC가 공을 잡고 "던지는 시늉" 먼저 실행
-    const thinkTime = 500 + Math.random() * 1000;
+    // NPC가 고민하는 랜덤 시간 (0.5초~2초)
+    const thinkTime = 500 + Math.random() * 1500;
 
     setTimeout(() => {
-      fakeThrowAnimation(current, () => {
-        setTimeout(() => {
-          animateThrow(current, target);
-          ball.heldBy = target;
-          throws++;
-        }, 500);
-      });
+      animateThrow(current, target);
+      ball.heldBy = target;
+      throws++;
     }, thinkTime);
   }
 }

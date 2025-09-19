@@ -4,6 +4,7 @@ canvas.width = 600;
 canvas.height = 400;
 
 // --- 변경 가능한 파라미터 ---
+const catchDuration = 1000;   // catch 애니메이션 지속시간 (ms)
 const participantDelay = 500; // 참가자가 공을 받을 때 고정 대기 (ms)
 const npcMinDelay = 800;      // NPC가 던지기 전 최소 고민 시간 (ms)
 const npcMaxDelay = 2000;     // NPC가 던지기 전 최대 고민 시간 (ms)
@@ -21,7 +22,7 @@ let avatars = [];
 
 // 이미지 로딩
 let imagesLoaded = 0;
-const totalImages = 3 * playerStates.length + 1; // 3명 * 4상태 + 공 (간단 계산)
+const totalImages = 3 * playerStates.length + 1; // 3명 * 4상태 + 공
 function loadImage(src, onLoadCallback) {
   const img = new Image();
   img.src = src;
@@ -125,6 +126,7 @@ function throwBall() {
 
   if (current === 0) { // 참여자가 공을 가지고 있으면 선택 대기
     if (!userSelected) {
+      // 참가자가 선택할 때까지 계속 체크
       requestAnimationFrame(throwBall);
       return;
     }
@@ -144,15 +146,16 @@ function throwBall() {
     }
   }
 
-  // animate 진행 전 ball.heldBy를 미리 바꿔서 공 위치 계산에 문제 없게 함
+  // animate 진행
   animateThrow(current, target);
+  // 공 소유자 정보는 바로 갱신 (animate 내에서 참조 가능하도록)
   ball.heldBy = target;
   throws++;
 }
 
 // 공 애니메이션 (throw 상태 이미지 순차 표시, 각 200ms)
 function animateThrow(from, to) {
-  const throwImgs = avatars[from]["throw"]; // 3개 이미지
+  const throwImgs = avatars[from]["throw"]; // 3개 이미지 배열
   let step = 0;
   const steps = throwImgs.length;
   const intervalTime = 200; // 각 이미지 표시 시간(ms)
@@ -181,27 +184,32 @@ function animateThrow(from, to) {
     if (step >= steps) {
       clearInterval(interval);
 
-      // 수신자 상태 처리
+      // 수신자 상태를 catch로 변경
       players[to].state = "catch";
-      // catch 애니메이션 후 잠깐 active 또는 idle로 복귀
-      setTimeout(() => { players[to].state = "idle"; }, 1000);
 
+      // 던진 사람 초기화
       players[from].state = "idle";
       players[from].currentThrowImg = null;
 
-      // ------------- 핵심 수정: 대기시간을 `from`이 아니라 `to`(수신자) 기준으로 적용 -------------
-      if (to === 0) {
-        // 참가자에게 넘어갔으므로 참가자가 선택할 수 있도록 고정 대기 후 throwBall 호출
-        setTimeout(() => {
-          // 참가자에게 공이 있으므로 throwBall이 userSelected 체크를 통해 대기합니다.
-          requestAnimationFrame(throwBall);
-        }, participantDelay);
-      } else {
-        // 수신자가 NPC이면 랜덤 고민 시간 적용
-        const randomDelay = npcMinDelay + Math.random() * (npcMaxDelay - npcMinDelay);
-        setTimeout(throwBall, randomDelay);
-      }
-      // ---------------------------------------------------------------------------------------
+      // --- 핵심: catchDuration 이후에 idle로 바꾸고, 그 시점에서 생각시간을 적용 ---
+      setTimeout(() => {
+        // catch가 끝나고 idle로 변경
+        players[to].state = "idle";
+
+        if (to === 0) {
+          // 참가자가 받음: 참가자가 선택하도록 기다리는 루프를 participantDelay 후 시작
+          setTimeout(() => {
+            // 참가자가 클릭할 때까지 requestAnimationFrame 루프로 대기
+            requestAnimationFrame(throwBall);
+          }, participantDelay);
+        } else {
+          // NPC가 받음: idle이 된 뒤 NPC의 '고민 시간' 동안 기다렸다가 자동으로 던지기
+          const randomDelay = npcMinDelay + Math.random() * (npcMaxDelay - npcMinDelay);
+          setTimeout(throwBall, randomDelay);
+        }
+
+      }, catchDuration);
+      // ---------------------------------------------------------------------------
     }
   }, intervalTime);
 }

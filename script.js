@@ -107,6 +107,7 @@ function throwBall() {
   let target;
 
   if (current === 0) {
+    // 참여자가 공을 가진 경우
     if (!userSelected) {
       requestAnimationFrame(throwBall);
       return;
@@ -117,10 +118,10 @@ function throwBall() {
     npcChainCount = 0;
     lastNpcPair = null;
   } else {
+    // NPC가 공을 가진 경우
     if (condition === "inclusion") {
-      if (throws === maxThrows - 1) {
-        target = 0;
-      } else {
+      if (throws === maxThrows - 1) target = 0;
+      else {
         do {
           target = Math.random() < 0.4 ? 0 : (Math.random() < 0.5 ? 1 : 2);
           if (target === 0) {
@@ -129,12 +130,8 @@ function throwBall() {
             break;
           } else {
             const newPair = [current, target].sort().join("-");
-            if (newPair === lastNpcPair) {
-              npcChainCount++;
-            } else {
-              npcChainCount = 1;
-              lastNpcPair = newPair;
-            }
+            npcChainCount = (newPair === lastNpcPair) ? npcChainCount + 1 : 1;
+            lastNpcPair = newPair;
           }
         } while (npcChainCount > 3);
       }
@@ -145,18 +142,20 @@ function throwBall() {
         target = (Math.random() < 0.5 ? 1 : 2); // 그 이후는 NPC끼리만
       }
 
+      // animateThrow 호출 전에 throws 증가
+      throws++;
       setTimeout(() => {
         animateThrow(current, target);
         ball.heldBy = target;
-        throws++;
-      }, 500); // 고정 지연
+      }, 500);
       return;
     }
   }
 
+  // 일반 animateThrow 호출
+  throws++;
   animateThrow(current, target);
   ball.heldBy = target;
-  throws++;
 }
 
 function animateThrow(from, to) {
@@ -197,11 +196,8 @@ function animateThrow(from, to) {
 function drawPlayers() {
   for (let i = 0; i < players.length; i++) {
     let img;
-    if (players[i].state === "throw" && players[i].currentThrowImg) {
-      img = players[i].currentThrowImg;
-    } else {
-      img = avatars[i][players[i].state];
-    }
+    if (players[i].state === "throw" && players[i].currentThrowImg) img = players[i].currentThrowImg;
+    else img = avatars[i][players[i].state];
     ctx.drawImage(img, players[i].x - 40, players[i].y - 40, 80, 80);
     ctx.fillStyle = "black";
     ctx.font = "16px Arial";

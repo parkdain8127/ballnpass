@@ -52,7 +52,7 @@ let ball = {x: 300, y: 350, radius: 10, heldBy: 0};
 let throws = 0;
 const maxThrows = 30;
 
-let condition = "exclusion"; // 여기서 "inclusion" / "exclusion" 변경 가능
+let condition = "exclusion"; // "inclusion" / "exclusion"
 let npcChainCount = 0;
 let lastNpcPair = null;
 
@@ -139,17 +139,17 @@ function throwBall() {
         } while (npcChainCount > 3);
       }
     } else if (condition === "exclusion") {
-      if (throws < 5) {
-        target = 0; // 초반 5번은 무조건 참여자에게
+      if (throws < 8) {
+        target = 0; // 처음 8번은 참여자가 무조건 받음
       } else {
-        target = (Math.random() < 0.5 ? 1 : 2); // 이후는 NPC끼리만
+        target = (Math.random() < 0.5 ? 1 : 2); // 그 이후는 NPC끼리만
       }
 
       setTimeout(() => {
         animateThrow(current, target);
         ball.heldBy = target;
         throws++;
-      }, 500); // inclusion처럼 고정 지연
+      }, 500); // 고정 지연
       return;
     }
   }

@@ -3,6 +3,12 @@ const ctx = canvas.getContext("2d");
 canvas.width = 600;
 canvas.height = 400;
 
+// --- 변경 가능한 파라미터 ---
+const participantDelay = 500; // 참가자가 공을 받을 때 고정 대기 (ms)
+const npcMinDelay = 800;      // NPC가 던지기 전 최소 고민 시간 (ms)
+const npcMaxDelay = 2000;     // NPC가 던지기 전 최대 고민 시간 (ms)
+// -----------------------------
+
 // 플레이어 설정
 let players = [
   {name: "You", x: 300, y: 350, state: "idle", currentThrowImg: null},
@@ -15,15 +21,13 @@ let avatars = [];
 
 // 이미지 로딩
 let imagesLoaded = 0;
-const totalImages = 3 * playerStates.length + 1; // 3명 * 4상태 + 공
-
+const totalImages = 3 * playerStates.length + 1; // 3명 * 4상태 + 공 (간단 계산)
 function loadImage(src, onLoadCallback) {
   const img = new Image();
   img.src = src;
   img.onload = onLoadCallback;
   return img;
 }
-
 function onImageLoad() {
   imagesLoaded++;
   if (imagesLoaded === totalImages) {
@@ -65,7 +69,8 @@ let userSelected = false;
 let targetPlayer = null;
 
 canvas.addEventListener('click', (e) => {
-  if (players[0].state !== "idle") return; // 던지는 중엔 선택 불가
+  // 참가자가 공을 가지고 있고 idle 상태일 때만 선택 허용
+  if (players[0].state !== "idle") return;
   const rect = canvas.getBoundingClientRect();
   const mouseX = e.clientX - rect.left;
   const mouseY = e.clientY - rect.top;
@@ -139,6 +144,7 @@ function throwBall() {
     }
   }
 
+  // animate 진행 전 ball.heldBy를 미리 바꿔서 공 위치 계산에 문제 없게 함
   animateThrow(current, target);
   ball.heldBy = target;
   throws++;
@@ -174,18 +180,28 @@ function animateThrow(from, to) {
     step++;
     if (step >= steps) {
       clearInterval(interval);
+
+      // 수신자 상태 처리
       players[to].state = "catch";
+      // catch 애니메이션 후 잠깐 active 또는 idle로 복귀
       setTimeout(() => { players[to].state = "idle"; }, 1000);
+
       players[from].state = "idle";
       players[from].currentThrowImg = null;
 
-      // NPC일 경우 랜덤 대기 (800~2000ms), 참가자는 고정 500ms
-      if (from === 0) {
-        setTimeout(throwBall, 500); 
+      // ------------- 핵심 수정: 대기시간을 `from`이 아니라 `to`(수신자) 기준으로 적용 -------------
+      if (to === 0) {
+        // 참가자에게 넘어갔으므로 참가자가 선택할 수 있도록 고정 대기 후 throwBall 호출
+        setTimeout(() => {
+          // 참가자에게 공이 있으므로 throwBall이 userSelected 체크를 통해 대기합니다.
+          requestAnimationFrame(throwBall);
+        }, participantDelay);
       } else {
-        const randomDelay = 800 + Math.random() * 1200;
+        // 수신자가 NPC이면 랜덤 고민 시간 적용
+        const randomDelay = npcMinDelay + Math.random() * (npcMaxDelay - npcMinDelay);
         setTimeout(throwBall, randomDelay);
       }
+      // ---------------------------------------------------------------------------------------
     }
   }, intervalTime);
 }

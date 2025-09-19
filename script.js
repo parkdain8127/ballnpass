@@ -140,9 +140,9 @@ function throwBall() {
       }
     } else if (condition === "exclusion") {
       if (throws < 5) {
-        target = Math.random() < 0.3 ? 0 : (Math.random() < 0.5 ? 1 : 2);
+        target = 0; // 초반 5번은 무조건 참여자에게
       } else {
-        target = (Math.random() < 0.5 ? 1 : 2);
+        target = (Math.random() < 0.5 ? 1 : 2); // 이후는 NPC끼리만
       }
 
       setTimeout(() => {

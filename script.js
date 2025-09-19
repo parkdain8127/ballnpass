@@ -178,7 +178,14 @@ function animateThrow(from, to) {
       setTimeout(() => { players[to].state = "idle"; }, 1000);
       players[from].state = "idle";
       players[from].currentThrowImg = null;
-      setTimeout(throwBall, 500);
+
+      // NPC일 경우 랜덤 대기 (800~2000ms), 참가자는 고정 500ms
+      if (from === 0) {
+        setTimeout(throwBall, 500); 
+      } else {
+        const randomDelay = 800 + Math.random() * 1200;
+        setTimeout(throwBall, randomDelay);
+      }
     }
   }, intervalTime);
 }
